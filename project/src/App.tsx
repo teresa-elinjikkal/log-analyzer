@@ -2,6 +2,7 @@ import React from 'react';
 import { Dashboard } from './Dashboard';
 import { Chatbot } from './components/Chatbot';
 import { Navigation } from './components/Navigation';
+import { ErrorsPage } from './components/ErrorsPage';
 import { LogStats } from '../types';
 
 // Mock data for demonstration
@@ -58,6 +59,7 @@ function App() {
             stats={mockStats}
             isStreaming={isStreaming}
             onToggleStreaming={handleToggleStreaming}
+            onNavigateToErrors={() => setActiveSection('errors')}
           />
         );
       case 'logs':
@@ -71,12 +73,7 @@ function App() {
         );
       case 'errors':
         return (
-          <div className="space-y-6">
-            <h1 className="text-3xl font-bold text-white">Error Analysis</h1>
-            <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-              <p className="text-gray-300">Detailed error analysis and debugging tools coming soon...</p>
-            </div>
-          </div>
+          <ErrorsPage />
         );
       case 'analytics':
         return (

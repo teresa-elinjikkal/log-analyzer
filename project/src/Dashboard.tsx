@@ -15,9 +15,10 @@ interface DashboardProps {
   stats: LogStats;
   isStreaming: boolean;
   onToggleStreaming: () => void;
+  onNavigateToErrors?: () => void;
 }
 
-export const Dashboard: React.FC<DashboardProps> = ({ stats, isStreaming, onToggleStreaming }) => {
+export const Dashboard: React.FC<DashboardProps> = ({ stats, isStreaming, onToggleStreaming, onNavigateToErrors }) => {
   // Generate time series data for the last 24 hours
   const generateTimeSeriesData = (): ChartDataPoint[] => {
     const now = new Date();
@@ -44,8 +45,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ stats, isStreaming, onTogg
     icon: React.ReactNode;
     trend?: string;
     color: string;
-  }> = ({ title, value, icon, trend, color }) => (
-    <div className="bg-gray-800 rounded-xl p-6 border border-gray-700 hover:border-gray-600 transition-all duration-200 hover:shadow-lg">
+    onClick?: () => void;
+  }> = ({ title, value, icon, trend, color, onClick }) => (
+    <div 
+      className={`bg-gray-800 rounded-xl p-6 border border-gray-700 hover:border-gray-600 transition-all duration-200 hover:shadow-lg ${
+        onClick ? 'cursor-pointer hover:scale-105' : ''
+      }`}
+      onClick={onClick}
+    >
       <div className="flex items-center justify-between mb-4">
         <div className={`p-3 rounded-lg ${color}`}>
           {icon}
@@ -99,6 +106,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ stats, isStreaming, onTogg
           value={stats.errorCount}
           icon={<AlertTriangle className="w-6 h-6 text-white" />}
           color="bg-red-600"
+          onClick={onNavigateToErrors}
         />
         <StatCard
           title="Warnings"
