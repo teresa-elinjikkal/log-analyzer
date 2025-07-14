@@ -1,4 +1,4 @@
-# 🔍 AI-Powered Log Analyzer
+# AI-Powered Log Analyzer
 
 ## Overview
 
