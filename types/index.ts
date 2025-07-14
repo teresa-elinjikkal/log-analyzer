@@ -1,14 +1,12 @@
 export interface LogEntry {
   id: string;
-  timestamp: Date;
-  level: 'ERROR' | 'WARN' | 'INFO' | 'DEBUG';
+  timestamp: string;
+  level: 'info' | 'warn' | 'error' | 'debug';
   message: string;
   source: string;
   ip?: string;
-  userAgent?: string;
-  responseTime?: number;
   statusCode?: number;
-  method?: string;
+  responseTime?: number;
   path?: string;
 }
 
@@ -16,17 +14,14 @@ export interface LogStats {
   totalLogs: number;
   errorCount: number;
   warningCount: number;
-  infoCount: number;
   avgResponseTime: number;
+  statusCodes: Array<{ code: number; count: number }>;
   topIPs: Array<{ ip: string; count: number }>;
   topPaths: Array<{ path: string; count: number }>;
-  statusCodes: Array<{ code: number; count: number }>;
 }
 
 export interface ChartDataPoint {
   timestamp: string;
   value: number;
-  label?: string;
+  label: string;
 }
-
-export type ViewMode = 'dashboard' | 'logs' | 'search' | 'analytics' | 'settings';
