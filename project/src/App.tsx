@@ -3,6 +3,10 @@ import { Dashboard } from './Dashboard';
 import { Chatbot } from './components/Chatbot';
 import { Navigation } from './components/Navigation';
 import { ErrorsPage } from './components/ErrorsPage';
+import { SettingsPage } from './components/SettingsPage';
+import { LogsPage } from './components/LogsPage';
+import { AnalyticsPage } from './components/AnalyticsPage';
+import { LogIngestionPage } from './components/LogIngestionPage';
 import { LogStats } from '../types';
 
 // Mock data for demonstration
@@ -64,12 +68,7 @@ function App() {
         );
       case 'logs':
         return (
-          <div className="space-y-6">
-            <h1 className="text-3xl font-bold text-white">Logs</h1>
-            <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-              <p className="text-gray-300">Log viewer and search functionality coming soon...</p>
-            </div>
-          </div>
+          <LogsPage />
         );
       case 'errors':
         return (
@@ -77,12 +76,11 @@ function App() {
         );
       case 'analytics':
         return (
-          <div className="space-y-6">
-            <h1 className="text-3xl font-bold text-white">Advanced Analytics</h1>
-            <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-              <p className="text-gray-300">Advanced analytics and reporting features coming soon...</p>
-            </div>
-          </div>
+          <AnalyticsPage />
+        );
+      case 'ingestion':
+        return (
+          <LogIngestionPage />
         );
       case 'chatbot':
         return (
@@ -100,6 +98,10 @@ function App() {
               />
             </div>
           </div>
+        );
+      case 'settings':
+        return (
+          <SettingsPage />
         );
       default:
         return (

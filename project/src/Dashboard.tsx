@@ -5,7 +5,6 @@ import {
   AlertTriangle, 
   Info, 
   Clock, 
-  Globe,
   TrendingUp,
   Server,
   Zap
@@ -215,30 +214,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ stats, isStreaming, onTogg
       </div>
 
       {/* Bottom Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Top IPs */}
-        <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-          <div className="flex items-center space-x-2 mb-6">
-            <Globe className="w-5 h-5 text-blue-400" />
-            <h3 className="text-lg font-semibold text-white">Top IP Addresses</h3>
-          </div>
-          <div className="space-y-4">
-            {stats.topIPs.map((ip, index) => (
-              <div key={ip.ip} className="flex items-center justify-between py-2">
-                <div className="flex items-center space-x-3">
-                  <div className="w-6 h-6 bg-gray-700 rounded text-xs flex items-center justify-center text-gray-300">
-                    {index + 1}
-                  </div>
-                  <span className="text-gray-300 font-mono">{ip.ip}</span>
-                </div>
-                <span className="text-blue-400 font-medium">{ip.count}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
+      <div className="grid grid-cols-1 gap-6">
         {/* Top Paths */}
-        <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
+        <div className="bg-gray-800 rounded-xl p-6 border border-gray-700 max-w-2xl">
           <div className="flex items-center space-x-2 mb-6">
             <Server className="w-5 h-5 text-green-400" />
             <h3 className="text-lg font-semibold text-white">Top Requested Paths</h3>

@@ -5,7 +5,9 @@ import {
   AlertTriangle, 
   BarChart3,
   Search,
-  Bot
+  Upload,
+  Bot,
+  Settings
 } from 'lucide-react';
 
 interface NavigationProps {
@@ -18,8 +20,12 @@ export const Navigation: React.FC<NavigationProps> = ({ activeSection, onSection
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'logs', label: 'Logs', icon: FileText },
     { id: 'errors', label: 'Errors', icon: AlertTriangle },
+    { id: 'analytics', label: 'Analytics', icon: BarChart3 },
+    { id: 'ingestion', label: 'Log Ingestion', icon: Upload },
     { id: 'chatbot', label: 'AI Assistant', icon: Bot },
+    { id: 'settings', label: 'Settings', icon: Settings },
   ];
+
 
   return (
     <div className="w-64 bg-gray-800 border-r border-gray-700 flex flex-col h-full">
