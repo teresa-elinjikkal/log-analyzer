@@ -5,7 +5,6 @@ import { Navigation } from './components/Navigation';
 import { ErrorsPage } from './components/ErrorsPage';
 import { SettingsPage } from './components/SettingsPage';
 import { LogsPage } from './components/LogsPage';
-import { AnalyticsPage } from './components/AnalyticsPage';
 import { LogIngestionPage } from './components/LogIngestionPage';
 import { LogStats } from '../types';
 
@@ -73,10 +72,6 @@ function App() {
       case 'errors':
         return (
           <ErrorsPage />
-        );
-      case 'analytics':
-        return (
-          <AnalyticsPage />
         );
       case 'ingestion':
         return (

@@ -20,7 +20,6 @@ export const Navigation: React.FC<NavigationProps> = ({ activeSection, onSection
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'logs', label: 'Logs', icon: FileText },
     { id: 'errors', label: 'Errors', icon: AlertTriangle },
-    { id: 'analytics', label: 'Analytics', icon: BarChart3 },
     { id: 'ingestion', label: 'Log Ingestion', icon: Upload },
     { id: 'chatbot', label: 'AI Assistant', icon: Bot },
     { id: 'settings', label: 'Settings', icon: Settings },
@@ -37,7 +36,7 @@ export const Navigation: React.FC<NavigationProps> = ({ activeSection, onSection
           </div>
           <div>
             <h2 className="text-white font-bold text-lg">LogMonitor</h2>
-            <p className="text-gray-400 text-xs">Analytics Platform</p>
+            
           </div>
         </div>
       </div>

@@ -6,9 +6,32 @@ import {
   Info, 
   Clock, 
   TrendingUp,
+  TrendingDown,
   Server,
-  Zap
+  Zap,
+  Users,
+  Globe,
+  Database,
+  CheckCircle,
+  Download,
+  RefreshCw,
+  BarChart3
 } from 'lucide-react';
+
+interface MetricCard {
+  title: string;
+  value: string;
+  change: string;
+  trend: 'up' | 'down' | 'neutral';
+  icon: React.ReactNode;
+  color: string;
+}
+
+interface ChartData {
+  label: string;
+  value: number;
+  color: string;
+}
 
 interface DashboardProps {
   stats: LogStats;
@@ -18,57 +41,256 @@ interface DashboardProps {
 }
 
 export const Dashboard: React.FC<DashboardProps> = ({ stats, isStreaming, onToggleStreaming, onNavigateToErrors }) => {
-  // Generate time series data for the last 24 hours
-  const generateTimeSeriesData = (): ChartDataPoint[] => {
-    const now = new Date();
-    const data: ChartDataPoint[] = [];
-    
-    for (let i = 23; i >= 0; i--) {
-      const timestamp = new Date(now.getTime() - i * 60 * 60 * 1000);
-      data.push({
-        timestamp: timestamp.toISOString(),
-        value: Math.floor(Math.random() * 100) + 20,
-        label: timestamp.getHours().toString().padStart(2, '0') + ':00'
-      });
+  const [selectedTimeRange, setSelectedTimeRange] = React.useState('7d');
+
+  // Enhanced metrics data
+  const enhancedMetrics: MetricCard[] = [
+    {
+      title: 'Total Requests',
+      value: '2.4M',
+      change: '+12.5%',
+      trend: 'up',
+      icon: <Activity className="w-6 h-6 text-white" />,
+      color: 'bg-blue-600'
+    },
+    {
+      title: 'Unique Users',
+      value: '45.2K',
+      change: '+8.3%',
+      trend: 'up',
+      icon: <Users className="w-6 h-6 text-white" />,
+      color: 'bg-green-600'
+    },
+    {
+      title: 'Error Rate',
+      value: '0.8%',
+      change: '-2.1%',
+      trend: 'down',
+      icon: <AlertTriangle className="w-6 h-6 text-white" />,
+      color: 'bg-red-600'
+    },
+    {
+      title: 'Avg Response Time',
+      value: '245ms',
+      change: '-15.2%',
+      trend: 'down',
+      icon: <Clock className="w-6 h-6 text-white" />,
+      color: 'bg-purple-600'
+    },
+    {
+      title: 'Uptime',
+      value: '99.9%',
+      change: '+0.1%',
+      trend: 'up',
+      icon: <CheckCircle className="w-6 h-6 text-white" />,
+      color: 'bg-emerald-600'
+    },
+    {
+      title: 'Data Transfer',
+      value: '1.2TB',
+      change: '+18.7%',
+      trend: 'up',
+      icon: <Database className="w-6 h-6 text-white" />,
+      color: 'bg-orange-600'
     }
+  ];
+
+  // Chart data
+  const requestsOverTime = [
+    { label: 'Mon', value: 320, color: '#3B82F6' },
+    { label: 'Tue', value: 450, color: '#3B82F6' },
+    { label: 'Wed', value: 380, color: '#3B82F6' },
+    { label: 'Thu', value: 520, color: '#3B82F6' },
+    { label: 'Fri', value: 680, color: '#3B82F6' },
+    { label: 'Sat', value: 420, color: '#3B82F6' },
+    { label: 'Sun', value: 350, color: '#3B82F6' }
+  ];
+
+  const topEndpoints = [
+    { label: '/api/users', value: 45230, color: '#10B981' },
+    { label: '/api/auth/login', value: 32150, color: '#3B82F6' },
+    { label: '/api/products', value: 28940, color: '#8B5CF6' },
+    { label: '/api/orders', value: 21680, color: '#F59E0B' },
+    { label: '/health', value: 18750, color: '#EF4444' }
+  ];
+
+  const geographicData = [
+    { label: 'United States', value: 35, color: '#3B82F6' },
+    { label: 'United Kingdom', value: 18, color: '#10B981' },
+    { label: 'Germany', value: 12, color: '#8B5CF6' },
+    { label: 'France', value: 10, color: '#F59E0B' },
+    { label: 'Canada', value: 8, color: '#EF4444' },
+    { label: 'Others', value: 17, color: '#6B7280' }
+  ];
+
+  const deviceTypes = [
+    { label: 'Desktop', value: 52, color: '#3B82F6' },
+    { label: 'Mobile', value: 35, color: '#10B981' },
+    { label: 'Tablet', value: 13, color: '#8B5CF6' }
+  ];
+
+  const renderBarChart = (data: ChartData[], title: string) => {
+    const maxValue = Math.max(...data.map(d => d.value));
     
-    return data;
+    return (
+      <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
+        <h3 className="text-lg font-semibold text-white mb-6">{title}</h3>
+        <div className="space-y-4">
+          {data.map((item, index) => (
+            <div key={index} className="flex items-center space-x-3">
+              <div className="w-20 text-sm text-gray-300 truncate">{item.label}</div>
+              <div className="flex-1 flex items-center space-x-2">
+                <div className="flex-1 h-6 bg-gray-700 rounded-full overflow-hidden">
+                  <div
+                    className="h-full transition-all duration-500 rounded-full"
+                    style={{
+                      width: `${(item.value / maxValue) * 100}%`,
+                      backgroundColor: item.color
+                    }}
+                  />
+                </div>
+                <div className="w-16 text-sm text-gray-300 text-right">
+                  {typeof item.value === 'number' && item.value > 1000 
+                    ? `${(item.value / 1000).toFixed(1)}K` 
+                    : item.value}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
   };
 
-  const timeSeriesData = generateTimeSeriesData();
-  const maxValue = Math.max(...timeSeriesData.map(d => d.value));
-
-  const StatCard: React.FC<{
-    title: string;
-    value: string | number;
-    icon: React.ReactNode;
-    trend?: string;
-    color: string;
-    onClick?: () => void;
-  }> = ({ title, value, icon, trend, color, onClick }) => (
-    <div 
-      className={`bg-gray-800 rounded-xl p-6 border border-gray-700 hover:border-gray-600 transition-all duration-200 hover:shadow-lg ${
-        onClick ? 'cursor-pointer hover:scale-105' : ''
-      }`}
-      onClick={onClick}
-    >
-      <div className="flex items-center justify-between mb-4">
-        <div className={`p-3 rounded-lg ${color}`}>
-          {icon}
+  const renderPieChart = (data: ChartData[], title: string) => {
+    const total = data.reduce((sum, item) => sum + item.value, 0);
+    let currentAngle = 0;
+    
+    return (
+      <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
+        <h3 className="text-lg font-semibold text-white mb-6">{title}</h3>
+        <div className="flex items-center justify-center">
+          <div className="relative">
+            <svg width="200" height="200" className="transform -rotate-90">
+              {data.map((item, index) => {
+                const percentage = (item.value / total) * 100;
+                const angle = (percentage / 100) * 360;
+                const startAngle = currentAngle;
+                const endAngle = currentAngle + angle;
+                
+                const x1 = 100 + 80 * Math.cos((startAngle * Math.PI) / 180);
+                const y1 = 100 + 80 * Math.sin((startAngle * Math.PI) / 180);
+                const x2 = 100 + 80 * Math.cos((endAngle * Math.PI) / 180);
+                const y2 = 100 + 80 * Math.sin((endAngle * Math.PI) / 180);
+                
+                const largeArcFlag = angle > 180 ? 1 : 0;
+                
+                const pathData = [
+                  `M 100 100`,
+                  `L ${x1} ${y1}`,
+                  `A 80 80 0 ${largeArcFlag} 1 ${x2} ${y2}`,
+                  'Z'
+                ].join(' ');
+                
+                currentAngle += angle;
+                
+                return (
+                  <path
+                    key={index}
+                    d={pathData}
+                    fill={item.color}
+                    className="hover:opacity-80 transition-opacity"
+                  />
+                );
+              })}
+            </svg>
+          </div>
         </div>
-        {trend && (
-          <span className="text-xs text-green-400 font-medium flex items-center">
-            <TrendingUp className="w-3 h-3 mr-1" />
-            {trend}
-          </span>
-        )}
+        <div className="mt-6 space-y-2">
+          {data.map((item, index) => (
+            <div key={index} className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <div
+                  className="w-3 h-3 rounded-full"
+                  style={{ backgroundColor: item.color }}
+                />
+                <span className="text-gray-300 text-sm">{item.label}</span>
+              </div>
+              <span className="text-white font-medium">{item.value}%</span>
+            </div>
+          ))}
+        </div>
       </div>
-      <div>
-        <p className="text-2xl font-bold text-white mb-1">{value}</p>
-        <p className="text-gray-400 text-sm">{title}</p>
+    );
+  };
+
+  const renderLineChart = (data: ChartData[], title: string) => {
+    const maxValue = Math.max(...data.map(d => d.value));
+    const points = data.map((point, index) => 
+      `${(index / (data.length - 1)) * 300},${150 - (point.value / maxValue) * 120}`
+    ).join(' ');
+    
+    return (
+      <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
+        <h3 className="text-lg font-semibold text-white mb-6">{title}</h3>
+        <div className="h-48">
+          <svg viewBox="0 0 300 150" className="w-full h-full">
+            <defs>
+              <linearGradient id="lineGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#3B82F6" stopOpacity="0.3" />
+                <stop offset="100%" stopColor="#3B82F6" stopOpacity="0" />
+              </linearGradient>
+            </defs>
+            
+            {/* Grid lines */}
+            {[0, 1, 2, 3, 4].map(i => (
+              <line
+                key={i}
+                x1="0"
+                y1={i * 30}
+                x2="300"
+                y2={i * 30}
+                stroke="#374151"
+                strokeWidth="1"
+                opacity="0.3"
+              />
+            ))}
+            
+            {/* Area under curve */}
+            <polygon
+              points={`0,150 ${points} 300,150`}
+              fill="url(#lineGradient)"
+            />
+            
+            {/* Line */}
+            <polyline
+              points={points}
+              fill="none"
+              stroke="#3B82F6"
+              strokeWidth="2"
+            />
+            
+            {/* Data points */}
+            {data.map((point, index) => (
+              <circle
+                key={index}
+                cx={(index / (data.length - 1)) * 300}
+                cy={150 - (point.value / maxValue) * 120}
+                r="4"
+                fill="#3B82F6"
+                className="hover:r-6 transition-all duration-200"
+              />
+            ))}
+          </svg>
+        </div>
+        <div className="flex justify-between mt-4 text-sm text-gray-400">
+          {data.map((point, index) => (
+            <span key={index}>{point.label}</span>
+          ))}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="space-y-6">
@@ -78,111 +300,147 @@ export const Dashboard: React.FC<DashboardProps> = ({ stats, isStreaming, onTogg
           <h1 className="text-3xl font-bold text-white mb-2">Dashboard</h1>
           <p className="text-gray-400">Real-time log monitoring and analytics</p>
         </div>
-        <button
-          onClick={onToggleStreaming}
-          className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
-            isStreaming
-              ? 'bg-red-600 hover:bg-red-700 text-white'
-              : 'bg-green-600 hover:bg-green-700 text-white'
-          }`}
-        >
-          <Zap className="w-4 h-4" />
-          <span>{isStreaming ? 'Stop Streaming' : 'Start Streaming'}</span>
-        </button>
+        <div className="flex items-center space-x-3">
+          <select
+            value={selectedTimeRange}
+            onChange={(e) => setSelectedTimeRange(e.target.value)}
+            className="bg-gray-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 border border-gray-600"
+          >
+            <option value="24h">Last 24 Hours</option>
+            <option value="7d">Last 7 Days</option>
+            <option value="30d">Last 30 Days</option>
+            <option value="90d">Last 90 Days</option>
+          </select>
+          <button className="flex items-center space-x-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors">
+            <Download className="w-4 h-4" />
+            <span>Export</span>
+          </button>
+          <button className="flex items-center space-x-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors">
+            <RefreshCw className="w-4 h-4" />
+            <span>Refresh</span>
+          </button>
+          <button
+            onClick={onToggleStreaming}
+            className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+              isStreaming
+                ? 'bg-red-600 hover:bg-red-700 text-white'
+                : 'bg-green-600 hover:bg-green-700 text-white'
+            }`}
+          >
+            <Zap className="w-4 h-4" />
+            <span>{isStreaming ? 'Stop Streaming' : 'Start Streaming'}</span>
+          </button>
+        </div>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard
-          title="Total Logs"
-          value={stats.totalLogs.toLocaleString()}
-          icon={<Activity className="w-6 h-6 text-white" />}
-          trend="+12%"
-          color="bg-blue-600"
-        />
-        <StatCard
-          title="Errors"
-          value={stats.errorCount}
-          icon={<AlertTriangle className="w-6 h-6 text-white" />}
-          color="bg-red-600"
-          onClick={onNavigateToErrors}
-        />
-        <StatCard
-          title="Warnings"
-          value={stats.warningCount}
-          icon={<Info className="w-6 h-6 text-white" />}
-          color="bg-yellow-600"
-        />
-        <StatCard
-          title="Avg Response Time"
-          value={`${stats.avgResponseTime}ms`}
-          icon={<Clock className="w-6 h-6 text-white" />}
-          trend="-5%"
-          color="bg-green-600"
-        />
-      </div>
-
-      {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Log Volume Chart */}
-        <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold text-white">Log Volume (24h)</h3>
-            <div className="flex items-center space-x-1">
-              <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
-              <span className="text-xs text-gray-400">Live</span>
+      {/* Enhanced Metrics Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {enhancedMetrics.map((metric, index) => (
+          <div key={index} className="bg-gray-800 rounded-xl p-6 border border-gray-700 hover:border-gray-600 transition-all duration-200">
+            <div className="flex items-center justify-between mb-4">
+              <div className={`p-3 rounded-lg ${metric.color}`}>
+                {metric.icon}
+              </div>
+              <div className={`flex items-center space-x-1 text-sm font-medium ${
+                metric.trend === 'up' ? 'text-green-400' :
+                metric.trend === 'down' ? 'text-red-400' : 'text-gray-400'
+              }`}>
+                {metric.trend === 'up' ? <TrendingUp className="w-3 h-3" /> :
+                 metric.trend === 'down' ? <TrendingDown className="w-3 h-3" /> : null}
+                <span>{metric.change}</span>
+              </div>
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-white mb-1">{metric.value}</p>
+              <p className="text-gray-400 text-sm">{metric.title}</p>
             </div>
           </div>
-          <div className="h-64">
-            <svg viewBox="0 0 400 200" className="w-full h-full">
-              <defs>
-                <linearGradient id="chartGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor="#3B82F6" stopOpacity="0.3" />
-                  <stop offset="100%" stopColor="#3B82F6" stopOpacity="0" />
-                </linearGradient>
-              </defs>
-              
-              {/* Grid lines */}
-              {[0, 1, 2, 3, 4].map(i => (
-                <line
-                  key={i}
-                  x1="0"
-                  y1={i * 40}
-                  x2="400"
-                  y2={i * 40}
-                  stroke="#374151"
-                  strokeWidth="1"
-                  opacity="0.3"
-                />
-              ))}
-              
-              {/* Chart line */}
-              <polyline
-                fill="url(#chartGradient)"
-                stroke="#3B82F6"
-                strokeWidth="2"
-                points={timeSeriesData.map((point, index) => 
-                  `${(index / (timeSeriesData.length - 1)) * 400},${200 - (point.value / maxValue) * 180}`
-                ).join(' ')}
-              />
-              
-              {/* Data points */}
-              {timeSeriesData.map((point, index) => (
-                <circle
-                  key={index}
-                  cx={(index / (timeSeriesData.length - 1)) * 400}
-                  cy={200 - (point.value / maxValue) * 180}
-                  r="3"
-                  fill="#3B82F6"
-                  className="hover:r-5 transition-all duration-200"
-                />
-              ))}
-            </svg>
+        ))}
+      </div>
+
+      {/* Advanced Charts Row 1 */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {renderLineChart(requestsOverTime, 'Requests Over Time')}
+        {renderBarChart(topEndpoints, 'Top API Endpoints')}
+      </div>
+
+      {/* Advanced Charts Row 2 */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {renderPieChart(geographicData, 'Geographic Distribution')}
+        {renderPieChart(deviceTypes, 'Device Types')}
+      </div>
+
+      {/* Performance Insights */}
+      <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
+        <h3 className="text-lg font-semibold text-white mb-6">Performance Insights</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="text-center">
+            <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-3">
+              <Zap className="w-8 h-8 text-white" />
+            </div>
+            <h4 className="text-white font-medium mb-1">Peak Performance</h4>
+            <p className="text-gray-400 text-sm">Response times are 15% faster than last month</p>
+          </div>
+          
+          <div className="text-center">
+            <div className="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-3">
+              <TrendingUp className="w-8 h-8 text-white" />
+            </div>
+            <h4 className="text-white font-medium mb-1">Growing Traffic</h4>
+            <p className="text-gray-400 text-sm">User engagement increased by 23% this week</p>
+          </div>
+          
+          <div className="text-center">
+            <div className="w-16 h-16 bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-3">
+              <Server className="w-8 h-8 text-white" />
+            </div>
+            <h4 className="text-white font-medium mb-1">System Health</h4>
+            <p className="text-gray-400 text-sm">All services running optimally with 99.9% uptime</p>
+          </div>
+          
+          <div className="text-center">
+            <div className="w-16 h-16 bg-orange-600 rounded-full flex items-center justify-center mx-auto mb-3">
+              <Globe className="w-8 h-8 text-white" />
+            </div>
+            <h4 className="text-white font-medium mb-1">Global Reach</h4>
+            <p className="text-gray-400 text-sm">Serving users across 45+ countries worldwide</p>
           </div>
         </div>
+      </div>
 
-        {/* Status Codes Distribution */}
-        <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
+      {/* Enhanced Real-time Metrics */}
+      <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-lg font-semibold text-white">Live System Metrics</h3>
+          <div className="flex items-center space-x-2 text-green-400">
+            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+            <span className="text-sm">Live</span>
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div className="text-center">
+            <div className="text-3xl font-bold text-blue-400 mb-1">1,247</div>
+            <div className="text-gray-400 text-sm">Active Users</div>
+          </div>
+          <div className="text-center">
+            <div className="text-3xl font-bold text-green-400 mb-1">98.7%</div>
+            <div className="text-gray-400 text-sm">Success Rate</div>
+          </div>
+          <div className="text-center">
+            <div className="text-3xl font-bold text-purple-400 mb-1">156ms</div>
+            <div className="text-gray-400 text-sm">Avg Response</div>
+          </div>
+          <div className="text-center">
+            <div className="text-3xl font-bold text-orange-400 mb-1">2.1GB</div>
+            <div className="text-gray-400 text-sm">Data Processed</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Status Codes Distribution */}
+      <div className="grid grid-cols-1 gap-6">
+        <div className="bg-gray-800 rounded-xl p-6 border border-gray-700 max-w-2xl">
           <h3 className="text-lg font-semibold text-white mb-6">Status Code Distribution</h3>
           <div className="space-y-4">
             {stats.statusCodes.slice(0, 6).map((status, index) => {
@@ -209,30 +467,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ stats, isStreaming, onTogg
                 </div>
               );
             })}
-          </div>
-        </div>
-      </div>
-
-      {/* Bottom Row */}
-      <div className="grid grid-cols-1 gap-6">
-        {/* Top Paths */}
-        <div className="bg-gray-800 rounded-xl p-6 border border-gray-700 max-w-2xl">
-          <div className="flex items-center space-x-2 mb-6">
-            <Server className="w-5 h-5 text-green-400" />
-            <h3 className="text-lg font-semibold text-white">Top Requested Paths</h3>
-          </div>
-          <div className="space-y-4">
-            {stats.topPaths.map((path, index) => (
-              <div key={path.path} className="flex items-center justify-between py-2">
-                <div className="flex items-center space-x-3">
-                  <div className="w-6 h-6 bg-gray-700 rounded text-xs flex items-center justify-center text-gray-300">
-                    {index + 1}
-                  </div>
-                  <span className="text-gray-300 font-mono text-sm">{path.path}</span>
-                </div>
-                <span className="text-green-400 font-medium">{path.count}</span>
-              </div>
-            ))}
           </div>
         </div>
       </div>
