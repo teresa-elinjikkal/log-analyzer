@@ -23,3 +23,32 @@ dist-ssr
 *.sln
 *.sw?
 .env
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+.env
+.env.*
+*.log
+
+# Virtual environments
+venv/
+venv_clean/
+
+# Node.js
+node_modules/
+dist/
+.build/
+.next/
+out/
+.vscode/
+
+# Chroma cache & temp files
+rag-backend/chroma_temp/
+rag-backend/temp_files/
+
+# System
+.DS_Store
+Thumbs.db

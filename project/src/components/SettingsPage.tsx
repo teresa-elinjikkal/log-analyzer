@@ -1,19 +1,11 @@
 import React, { useState } from 'react';
 import { 
   Settings, 
-  User, 
   Bell, 
-  Shield, 
   Database, 
   Palette, 
-  Globe, 
-  Clock,
   Save,
-  RefreshCw,
-  Eye,
-  EyeOff,
   Check,
-  X,
   AlertTriangle,
   Info
 } from 'lucide-react';
@@ -31,27 +23,17 @@ export const SettingsPage: React.FC = () => {
     // General Settings
     siteName: 'LogMonitor',
     timezone: 'UTC',
-    language: 'en',
     theme: 'dark',
     
     // Notification Settings
     emailNotifications: true,
-    pushNotifications: false,
     errorAlerts: true,
-    weeklyReports: true,
     alertThreshold: 10,
-    
-    // Security Settings
-    twoFactorAuth: false,
-    sessionTimeout: 30,
-    ipWhitelist: '',
-    apiKeyRotation: 90,
     
     // Data Settings
     retentionPeriod: 90,
     backupFrequency: 'daily',
     compressionEnabled: true,
-    archiveOldLogs: true,
     
     // Display Settings
     itemsPerPage: 50,
@@ -60,8 +42,8 @@ export const SettingsPage: React.FC = () => {
     compactView: false
   });
 
-  const [showApiKey, setShowApiKey] = useState(false);
   const [unsavedChanges, setUnsavedChanges] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
 
   const sections: SettingSection[] = [
     {
@@ -75,12 +57,6 @@ export const SettingsPage: React.FC = () => {
       title: 'Notifications',
       icon: <Bell className="w-5 h-5" />,
       description: 'Configure alerts and notification preferences'
-    },
-    {
-      id: 'security',
-      title: 'Security',
-      icon: <Shield className="w-5 h-5" />,
-      description: 'Security settings and access controls'
     },
     {
       id: 'data',
@@ -101,10 +77,18 @@ export const SettingsPage: React.FC = () => {
     setUnsavedChanges(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    setSaveStatus('saving');
+    
     // Simulate saving settings
     setTimeout(() => {
       setUnsavedChanges(false);
+      setSaveStatus('saved');
+      
+      // Reset save status after 2 seconds
+      setTimeout(() => {
+        setSaveStatus('idle');
+      }, 2000);
     }, 1000);
   };
 
@@ -120,39 +104,22 @@ export const SettingsPage: React.FC = () => {
         />
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">Timezone</label>
-          <select
-            value={settings.timezone}
-            onChange={(e) => handleSettingChange('timezone', e.target.value)}
-            className="w-full bg-gray-700 text-white rounded-lg px-3 py-2 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="UTC">UTC</option>
-            <option value="America/New_York">Eastern Time</option>
-            <option value="America/Chicago">Central Time</option>
-            <option value="America/Denver">Mountain Time</option>
-            <option value="America/Los_Angeles">Pacific Time</option>
-            <option value="Europe/London">London</option>
-            <option value="Europe/Paris">Paris</option>
-            <option value="Asia/Tokyo">Tokyo</option>
-          </select>
-        </div>
-        
-        <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">Language</label>
-          <select
-            value={settings.language}
-            onChange={(e) => handleSettingChange('language', e.target.value)}
-            className="w-full bg-gray-700 text-white rounded-lg px-3 py-2 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="en">English</option>
-            <option value="es">Spanish</option>
-            <option value="fr">French</option>
-            <option value="de">German</option>
-            <option value="ja">Japanese</option>
-          </select>
-        </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-300 mb-2">Timezone</label>
+        <select
+          value={settings.timezone}
+          onChange={(e) => handleSettingChange('timezone', e.target.value)}
+          className="w-full bg-gray-700 text-white rounded-lg px-3 py-2 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="UTC">UTC</option>
+          <option value="America/New_York">Eastern Time</option>
+          <option value="America/Chicago">Central Time</option>
+          <option value="America/Denver">Mountain Time</option>
+          <option value="America/Los_Angeles">Pacific Time</option>
+          <option value="Europe/London">London</option>
+          <option value="Europe/Paris">Paris</option>
+          <option value="Asia/Tokyo">Tokyo</option>
+        </select>
       </div>
       
       <div>
@@ -217,22 +184,6 @@ export const SettingsPage: React.FC = () => {
         
         <div className="flex items-center justify-between">
           <div>
-            <h4 className="text-white font-medium">Push Notifications</h4>
-            <p className="text-gray-400 text-sm">Browser push notifications</p>
-          </div>
-          <label className="relative inline-flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              checked={settings.pushNotifications}
-              onChange={(e) => handleSettingChange('pushNotifications', e.target.checked)}
-              className="sr-only peer"
-            />
-            <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-          </label>
-        </div>
-        
-        <div className="flex items-center justify-between">
-          <div>
             <h4 className="text-white font-medium">Error Alerts</h4>
             <p className="text-gray-400 text-sm">Get notified of critical errors</p>
           </div>
@@ -241,22 +192,6 @@ export const SettingsPage: React.FC = () => {
               type="checkbox"
               checked={settings.errorAlerts}
               onChange={(e) => handleSettingChange('errorAlerts', e.target.checked)}
-              className="sr-only peer"
-            />
-            <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-          </label>
-        </div>
-        
-        <div className="flex items-center justify-between">
-          <div>
-            <h4 className="text-white font-medium">Weekly Reports</h4>
-            <p className="text-gray-400 text-sm">Receive weekly summary reports</p>
-          </div>
-          <label className="relative inline-flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              checked={settings.weeklyReports}
-              onChange={(e) => handleSettingChange('weeklyReports', e.target.checked)}
               className="sr-only peer"
             />
             <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
@@ -278,72 +213,6 @@ export const SettingsPage: React.FC = () => {
           <span className="text-white font-medium w-12">{settings.alertThreshold}</span>
         </div>
         <p className="text-gray-400 text-sm mt-1">Number of errors before triggering an alert</p>
-      </div>
-    </div>
-  );
-
-  const renderSecuritySettings = () => (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h4 className="text-white font-medium">Two-Factor Authentication</h4>
-          <p className="text-gray-400 text-sm">Add an extra layer of security to your account</p>
-        </div>
-        <label className="relative inline-flex items-center cursor-pointer">
-          <input
-            type="checkbox"
-            checked={settings.twoFactorAuth}
-            onChange={(e) => handleSettingChange('twoFactorAuth', e.target.checked)}
-            className="sr-only peer"
-          />
-          <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-        </label>
-      </div>
-      
-      <div>
-        <label className="block text-sm font-medium text-gray-300 mb-2">Session Timeout (minutes)</label>
-        <input
-          type="number"
-          value={settings.sessionTimeout}
-          onChange={(e) => handleSettingChange('sessionTimeout', parseInt(e.target.value))}
-          className="w-full bg-gray-700 text-white rounded-lg px-3 py-2 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          min="5"
-          max="480"
-        />
-      </div>
-      
-      <div>
-        <label className="block text-sm font-medium text-gray-300 mb-2">API Key</label>
-        <div className="flex space-x-2">
-          <div className="flex-1 relative">
-            <input
-              type={showApiKey ? 'text' : 'password'}
-              value="sk-1234567890abcdef1234567890abcdef"
-              readOnly
-              className="w-full bg-gray-700 text-white rounded-lg px-3 py-2 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10"
-            />
-            <button
-              onClick={() => setShowApiKey(!showApiKey)}
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white"
-            >
-              {showApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-            </button>
-          </div>
-          <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
-            <RefreshCw className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
-      
-      <div>
-        <label className="block text-sm font-medium text-gray-300 mb-2">IP Whitelist</label>
-        <textarea
-          value={settings.ipWhitelist}
-          onChange={(e) => handleSettingChange('ipWhitelist', e.target.value)}
-          placeholder="192.168.1.0/24&#10;10.0.0.0/8"
-          className="w-full bg-gray-700 text-white rounded-lg px-3 py-2 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 h-24 resize-none"
-        />
-        <p className="text-gray-400 text-sm mt-1">One IP address or CIDR block per line</p>
       </div>
     </div>
   );
@@ -377,38 +246,20 @@ export const SettingsPage: React.FC = () => {
         </select>
       </div>
       
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h4 className="text-white font-medium">Enable Compression</h4>
-            <p className="text-gray-400 text-sm">Compress logs to save storage space</p>
-          </div>
-          <label className="relative inline-flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              checked={settings.compressionEnabled}
-              onChange={(e) => handleSettingChange('compressionEnabled', e.target.checked)}
-              className="sr-only peer"
-            />
-            <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-          </label>
+      <div className="flex items-center justify-between">
+        <div>
+          <h4 className="text-white font-medium">Enable Compression</h4>
+          <p className="text-gray-400 text-sm">Compress logs to save storage space</p>
         </div>
-        
-        <div className="flex items-center justify-between">
-          <div>
-            <h4 className="text-white font-medium">Archive Old Logs</h4>
-            <p className="text-gray-400 text-sm">Move old logs to cold storage</p>
-          </div>
-          <label className="relative inline-flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              checked={settings.archiveOldLogs}
-              onChange={(e) => handleSettingChange('archiveOldLogs', e.target.checked)}
-              className="sr-only peer"
-            />
-            <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-          </label>
-        </div>
+        <label className="relative inline-flex items-center cursor-pointer">
+          <input
+            type="checkbox"
+            checked={settings.compressionEnabled}
+            onChange={(e) => handleSettingChange('compressionEnabled', e.target.checked)}
+            className="sr-only peer"
+          />
+          <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+        </label>
       </div>
     </div>
   );
@@ -483,10 +334,42 @@ export const SettingsPage: React.FC = () => {
     switch (activeSection) {
       case 'general': return renderGeneralSettings();
       case 'notifications': return renderNotificationSettings();
-      case 'security': return renderSecuritySettings();
       case 'data': return renderDataSettings();
       case 'display': return renderDisplaySettings();
       default: return renderGeneralSettings();
+    }
+  };
+
+  const getSaveButtonContent = () => {
+    switch (saveStatus) {
+      case 'saving':
+        return (
+          <>
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+            <span>Saving...</span>
+          </>
+        );
+      case 'saved':
+        return (
+          <>
+            <Check className="w-4 h-4" />
+            <span>Saved!</span>
+          </>
+        );
+      case 'error':
+        return (
+          <>
+            <AlertTriangle className="w-4 h-4" />
+            <span>Error</span>
+          </>
+        );
+      default:
+        return (
+          <>
+            <Save className="w-4 h-4" />
+            <span>Save Changes</span>
+          </>
+        );
     }
   };
 
@@ -496,15 +379,23 @@ export const SettingsPage: React.FC = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-white mb-2">Settings</h1>
-          <p className="text-gray-400">Configure your application preferences and security settings</p>
+          <p className="text-gray-400">Configure your application preferences</p>
         </div>
         {unsavedChanges && (
           <button
             onClick={handleSave}
-            className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+            disabled={saveStatus === 'saving'}
+            className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
+              saveStatus === 'saving' 
+                ? 'bg-gray-600 text-gray-300 cursor-not-allowed'
+                : saveStatus === 'saved'
+                ? 'bg-green-600 text-white'
+                : saveStatus === 'error'
+                ? 'bg-red-600 text-white'
+                : 'bg-blue-600 hover:bg-blue-700 text-white'
+            }`}
           >
-            <Save className="w-4 h-4" />
-            <span>Save Changes</span>
+            {getSaveButtonContent()}
           </button>
         )}
       </div>

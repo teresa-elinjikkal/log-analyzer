@@ -1,4 +1,7 @@
 import React, { useState, useRef } from 'react';
+import { useDispatch } from 'react-redux';
+import { addLogs } from '../redux/logsSlice';
+import { LogEntry } from '../redux/logsSlice';
 import { 
   Upload, 
   FileText, 
@@ -36,10 +39,12 @@ export const LogIngestionPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('upload');
   const [dragActive, setDragActive] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [processingFiles, setProcessingFiles] = useState(false);
   const [apiKey] = useState('sk-1234567890abcdef1234567890abcdef');
   const [copied, setCopied] = useState(false);
   const [webhookUrl] = useState('https://your-domain.com/webhook/logs');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const dispatch = useDispatch();
 
   // Mock log sources
   const logSources: LogSource[] = [
@@ -124,8 +129,112 @@ export const LogIngestionPage: React.FC = () => {
     }
   };
 
+  // Parse log file content
+  const parseLogFile = async (file: File): Promise<LogEntry[]> => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const content = e.target?.result as string;
+        const lines = content.split('\n').filter(line => line.trim());
+        
+        const logs: LogEntry[] = lines.map((line, index) => {
+          // Simple log parsing - in a real app, you'd have more sophisticated parsing
+          const timestamp = new Date(Date.now() - Math.random() * 24 * 60 * 60 * 1000).toISOString();
+          
+          // Determine log level from content
+          let level: 'ERROR' | 'WARNING' | 'INFO' = 'INFO';
+          if (line.toLowerCase().includes('error') || line.toLowerCase().includes('exception')) {
+            level = 'ERROR';
+          } else if (line.toLowerCase().includes('warn') || line.toLowerCase().includes('warning')) {
+            level = 'WARNING';
+          }
+          
+          return {
+            timestamp,
+            level,
+            message: line.trim()
+          };
+        });
+        
+        resolve(logs);
+      };
+      reader.readAsText(file);
+    });
+  };
+
+  // Process uploaded files
+  const processFiles = async () => {
+    if (uploadedFiles.length === 0) return;
+    
+    setProcessingFiles(true);
+    
+    try {
+      const allLogs: LogEntry[] = [];
+      
+      for (const file of uploadedFiles) {
+        const logs = await parseLogFile(file);
+        allLogs.push(...logs);
+      }
+      
+      // Add logs to Redux store
+      dispatch(addLogs(allLogs));
+      
+      // Clear uploaded files
+      setUploadedFiles([]);
+      
+      // Show success message (you could add a toast notification here)
+      console.log(`Processed ${allLogs.length} log entries from ${uploadedFiles.length} files`);
+      
+    } catch (error) {
+      console.error('Error processing files:', error);
+    } finally {
+      setProcessingFiles(false);
+    }
+  };
+
+  // Add test logs for demonstration
+  const addTestLogs = () => {
+    const testLogs: LogEntry[] = [
+      {
+        timestamp: new Date().toISOString(),
+        level: 'ERROR',
+        message: 'Test error: Database connection failed - status: 500 - path: /api/test - ip: 192.168.1.100 - service: test-service'
+      },
+      {
+        timestamp: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
+        level: 'WARNING',
+        message: 'Test warning: High memory usage - status: 200 - path: /api/health - ip: 10.0.0.1 - service: monitoring'
+      },
+      {
+        timestamp: new Date(Date.now() - 10 * 60 * 1000).toISOString(),
+        level: 'ERROR',
+        message: 'Test error: Authentication timeout - status: 401 - path: /api/auth - ip: 203.0.113.42 - service: auth-service'
+      }
+    ];
+    
+    dispatch(addLogs(testLogs));
+    console.log('Added test logs to store');
+  };
+
   const renderFileUpload = () => (
     <div className="space-y-6">
+      {/* Test Button */}
+      <div className="bg-gray-800 rounded-xl p-4 border border-gray-700">
+        <div className="flex items-center justify-between">
+          <div>
+            <h4 className="text-white font-semibold">Quick Test</h4>
+            <p className="text-gray-400 text-sm">Add sample error logs to test the Errors page</p>
+          </div>
+          <button
+            onClick={addTestLogs}
+            className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center space-x-2"
+          >
+            <Zap className="w-4 h-4" />
+            <span>Add Test Logs</span>
+          </button>
+        </div>
+      </div>
+
       {/* Drag and Drop Area */}
       <div
         className={`border-2 border-dashed rounded-xl p-8 text-center transition-all duration-200 ${
@@ -177,15 +286,36 @@ export const LogIngestionPage: React.FC = () => {
                 </div>
                 <div className="flex items-center space-x-2">
                   <span className="text-green-400 text-sm">✓ Ready</span>
-                  <button className="text-red-400 hover:text-red-300">
+                  <button 
+                    className="text-red-400 hover:text-red-300"
+                    onClick={() => setUploadedFiles(prev => prev.filter((_, i) => i !== index))}
+                  >
                     <span className="text-lg">×</span>
                   </button>
                 </div>
               </div>
             ))}
           </div>
-          <button className="w-full mt-4 bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg transition-colors">
-            Process Files
+          <button 
+            className={`w-full mt-4 py-2 rounded-lg transition-colors flex items-center justify-center space-x-2 ${
+              processingFiles 
+                ? 'bg-gray-600 text-gray-300 cursor-not-allowed' 
+                : 'bg-green-600 hover:bg-green-700 text-white'
+            }`}
+            onClick={processFiles}
+            disabled={processingFiles}
+          >
+            {processingFiles ? (
+              <>
+                <RefreshCw className="w-4 h-4 animate-spin" />
+                <span>Processing...</span>
+              </>
+            ) : (
+              <>
+                <Play className="w-4 h-4" />
+                <span>Process Files</span>
+              </>
+            )}
           </button>
         </div>
       )}

@@ -1,53 +1,19 @@
 import React from 'react';
 import { Dashboard } from './Dashboard';
-import { Chatbot } from './components/Chatbot';
 import { Navigation } from './components/Navigation';
 import { ErrorsPage } from './components/ErrorsPage';
 import { SettingsPage } from './components/SettingsPage';
+import { RagQueryPage } from './components/RagQueryPage';
 import { LogsPage } from './components/LogsPage';
 import { LogIngestionPage } from './components/LogIngestionPage';
-import { LogStats } from '../types';
-
-// Mock data for demonstration
-const mockStats: LogStats = {
-  totalLogs: 45672,
-  errorCount: 234,
-  warningCount: 1456,
-  avgResponseTime: 245,
-  statusCodes: [
-    { code: 200, count: 38945 },
-    { code: 404, count: 3421 },
-    { code: 500, count: 1876 },
-    { code: 301, count: 987 },
-    { code: 403, count: 443 },
-  ],
-  topIPs: [
-    { ip: '192.168.1.100', count: 2341 },
-    { ip: '10.0.0.45', count: 1876 },
-    { ip: '172.16.0.23', count: 1654 },
-    { ip: '203.0.113.42', count: 1432 },
-    { ip: '198.51.100.15', count: 1298 },
-  ],
-  topPaths: [
-    { path: '/api/users', count: 8765 },
-    { path: '/api/auth/login', count: 6543 },
-    { path: '/api/products', count: 5432 },
-    { path: '/health', count: 4321 },
-    { path: '/api/orders', count: 3210 },
-  ],
-};
+import QueryBox from './components/QueryBox';
 
 function App() {
   const [isStreaming, setIsStreaming] = React.useState(true);
-  const [isChatMinimized, setIsChatMinimized] = React.useState(false);
   const [activeSection, setActiveSection] = React.useState('dashboard');
 
   const handleToggleStreaming = () => {
     setIsStreaming(!isStreaming);
-  };
-
-  const handleToggleChatMinimize = () => {
-    setIsChatMinimized(!isChatMinimized);
   };
 
   const handleSectionChange = (section: string) => {
@@ -59,45 +25,21 @@ function App() {
       case 'dashboard':
         return (
           <Dashboard 
-            stats={mockStats}
             isStreaming={isStreaming}
             onToggleStreaming={handleToggleStreaming}
             onNavigateToErrors={() => setActiveSection('errors')}
           />
         );
       case 'logs':
-        return (
-          <LogsPage />
-        );
+        return <LogsPage />;
       case 'errors':
-        return (
-          <ErrorsPage />
-        );
+        return <ErrorsPage />;
       case 'ingestion':
-        return (
-          <LogIngestionPage />
-        );
-      case 'chatbot':
-        return (
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold text-white mb-2">AI Assistant</h1>
-                <p className="text-gray-400">Full-screen chat experience with your log analysis assistant</p>
-              </div>
-            </div>
-            <div className="bg-gray-800 rounded-xl border border-gray-700 h-[calc(100vh-200px)]">
-              <Chatbot 
-                isMinimized={false}
-                onToggleMinimize={() => {}}
-              />
-            </div>
-          </div>
-        );
+        return <LogIngestionPage />;
+      case 'ragquery':
+        return <RagQueryPage />;
       case 'settings':
-        return (
-          <SettingsPage />
-        );
+        return <SettingsPage />;
       default:
         return (
           <div className="space-y-6">
@@ -109,6 +51,7 @@ function App() {
         );
     }
   };
+
   return (
     <div className="min-h-screen bg-gray-900 flex">
       {/* Left Navigation Sidebar */}
@@ -118,29 +61,11 @@ function App() {
       />
 
       {/* Main Dashboard Area */}
-      <div className={`flex-1 transition-all duration-300 ${isChatMinimized ? 'mr-0' : 'mr-80'}`}>
+      <div className={`flex-1 transition-all duration-300 ${'mr-80'}`}>
         <div className="p-6">
           {renderContent()}
         </div>
       </div>
-
-      {/* Chatbot Sidebar */}
-      {!isChatMinimized && (
-        <div className="w-80 fixed right-0 top-0 h-full">
-          <Chatbot 
-            isMinimized={isChatMinimized}
-            onToggleMinimize={handleToggleChatMinimize}
-          />
-        </div>
-      )}
-
-      {/* Minimized Chatbot Button */}
-      {isChatMinimized && (
-        <Chatbot 
-          isMinimized={isChatMinimized}
-          onToggleMinimize={handleToggleChatMinimize}
-        />
-      )}
     </div>
   );
 }

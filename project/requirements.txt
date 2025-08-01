@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+langchain
+langchain-community
+google-generativeai
+chromadb
+PyPDF2

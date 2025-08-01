@@ -21,10 +21,9 @@ export const Navigation: React.FC<NavigationProps> = ({ activeSection, onSection
     { id: 'logs', label: 'Logs', icon: FileText },
     { id: 'errors', label: 'Errors', icon: AlertTriangle },
     { id: 'ingestion', label: 'Log Ingestion', icon: Upload },
-    { id: 'chatbot', label: 'AI Assistant', icon: Bot },
+    { id: 'ragquery', label: 'RAG Query', icon: FileText }, // ✅ New item
     { id: 'settings', label: 'Settings', icon: Settings },
   ];
-
 
   return (
     <div className="w-64 bg-gray-800 border-r border-gray-700 flex flex-col h-full">
@@ -36,7 +35,6 @@ export const Navigation: React.FC<NavigationProps> = ({ activeSection, onSection
           </div>
           <div>
             <h2 className="text-white font-bold text-lg">LogMonitor</h2>
-            
           </div>
         </div>
       </div>
@@ -59,7 +57,7 @@ export const Navigation: React.FC<NavigationProps> = ({ activeSection, onSection
           {navigationItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeSection === item.id;
-            
+
             return (
               <button
                 key={item.id}
@@ -72,34 +70,13 @@ export const Navigation: React.FC<NavigationProps> = ({ activeSection, onSection
               >
                 <Icon className="w-5 h-5" />
                 <span className="font-medium">{item.label}</span>
-                {item.id === 'errors' && (
-                  <span className="ml-auto bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
-                    234
-                  </span>
-                )}
-                {item.id === 'alerts' && (
-                  <span className="ml-auto bg-yellow-500 text-white text-xs px-2 py-0.5 rounded-full">
-                    12
-                  </span>
-                )}
               </button>
             );
           })}
         </div>
       </nav>
 
-      {/* User Profile */}
-      <div className="p-4 border-t border-gray-700">
-        <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-            <span className="text-white text-sm font-medium">JD</span>
-          </div>
-          <div className="flex-1">
-            <p className="text-white text-sm font-medium">John Doe</p>
-            <p className="text-gray-400 text-xs">Administrator</p>
-          </div>
-        </div>
-      </div>
+
     </div>
   );
 };
