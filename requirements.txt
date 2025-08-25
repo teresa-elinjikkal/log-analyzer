@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+langchain
+langchain-community
+langchain-core
+langchain-huggingface
+langchain-ollama
+chromadb
+sentence-transformers
+huggingface-hub
+python-dotenv
